@@ -1,0 +1,5 @@
+Week,Total Incidents,Critical,High,Medium,Low,SLA Compliance,Uptime,Resolved Tickets
+Week 1,124,12,31,42,39,98.2%,99.95%,119
+Week 2,118,9,28,40,41,98.8%,99.97%,115
+Week 3,142,16,39,48,39,97.6%,99.91%,136
+Week 4,101,7,21,37,36,99.1%,99.98%,99

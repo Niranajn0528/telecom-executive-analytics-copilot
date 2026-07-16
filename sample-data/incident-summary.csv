@@ -1,0 +1,7 @@
+Network Element,Issue Type,Count,Severity
+UPF,PFCP Association Failure,42,Critical
+SMF,N4 Session Failure,31,High
+AMF,Registration Reject,18,Medium
+UDM,Subscriber Lookup Failed,11,Low
+PCF,Policy Update Failure,9,Medium
+AUSF,Authentication Failure,5,Low
