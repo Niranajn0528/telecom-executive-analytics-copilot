@@ -1,0 +1,197 @@
+{
+  "name": "Telecom Executive Analytics",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1MjBoo7W1jfRm1_2Nv_0fkShX_x4km_2RPcja33B2vBU",
+          "mode": "list",
+          "cachedResultName": "AI Email Analysis",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MjBoo7W1jfRm1_2Nv_0fkShX_x4km_2RPcja33B2vBU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 920274801,
+          "mode": "list",
+          "cachedResultName": "Telecom_Incident_History_2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MjBoo7W1jfRm1_2Nv_0fkShX_x4km_2RPcja33B2vBU/edit#gid=920274801"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "32fef956-cecf-4b5b-9b3d-dc74f5041309",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "OMlYWQEiATS1gTlF",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const incidents = items;\n\nconst issueCount = {};\nconst networkCount = {};\nconst interfaceCount = {};\n\nlet criticalCount = 0;\n\nfor (const item of incidents) {\n\n  const issue = item.json[\"Issue Type\"];\n  const network = item.json[\"Network Element\"];\n  const iface = item.json[\"Interface\"]; // Important: use your actual column name\n  const severity = item.json[\"Severity\"];\n\n  issueCount[issue] = (issueCount[issue] || 0) + 1;\n  networkCount[network] = (networkCount[network] || 0) + 1;\n  interfaceCount[iface] = (interfaceCount[iface] || 0) + 1;\n\n  if (severity === \"Critical\") {\n    criticalCount++;\n  }\n}\n\nfunction topKey(obj) {\n  return Object.keys(obj).reduce((a, b) =>\n    obj[a] > obj[b] ? a : b\n  );\n}\n\nreturn [{\n  json: {\n    topIssue: topKey(issueCount),\n    topNetworkElement: topKey(networkCount),\n    topInterface: topKey(interfaceCount),\n    criticalIncidents: criticalCount\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "852c429f-ee32-4c3d-92fc-554f857c8292",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate a Weekly Telecom Operations Executive Summary.\n\nAnalytics:\n\nTop Issue: {{$json.topIssue}}\nTop Network Element: {{$json.topNetworkElement}}\nTop Interface: {{$json.topInterface}}\nCritical Incidents: {{$json.criticalIncidents}}\n\nProvide:\n\n1. Executive Summary\n2. Key Risks\n3. Recommended Actions\n4. Management Attention Required",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a Telecom Operations Executive Assistant.  Create a concise weekly operations summary.  Highlight:  - Top issue - Highest risk network element - Highest risk interface - Critical incidents - Recommended management actions  Keep the summary professional and management-focused."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        624,
+        0
+      ],
+      "id": "4cfebd14-5c5f-414a-beb7-8824c82740e5",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        560,
+        208
+      ],
+      "id": "70c23de1-f365-44ab-ba2e-0fe9c9d5806a",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "PlAjJlgiud39IeoJ",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "niranjan.arathi28@gmail.com",
+        "subject": "=Telecom Weekly Report - {{$now}}",
+        "message": "={{$json.text}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        976,
+        0
+      ],
+      "id": "bf5bcfe7-c021-442e-aacf-09f0e4c477ee",
+      "name": "Send a message",
+      "webhookId": "953ebc4a-ac8c-4566-a6bb-547d2d1a7dbe",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6QWqgT6JJuGCiocc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7f5a3967-e7cb-4c97-b0b4-017e868acd2e",
+      "name": "Telecom Executive Analytics Copilot"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telecom Executive Analytics Copilot": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "eb0c9e15-3050-419d-a2ac-3198e807198d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fadcc29a1ef0d6c91da020448df2bbe59980d81b38e29237657fe57d15485c80"
+  },
+  "id": "tOD3NEetDvhMsdL0",
+  "tags": []
+}
